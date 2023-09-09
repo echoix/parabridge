@@ -41,7 +41,7 @@ Issues = "https://github.com/grigoryvp/parabridge/issues"
 Source = "https://github.com/grigoryvp/parabridge"
 
 [project.scripts]
-parabridge = "parabridge.cli:parabridge"
+parabridge = "parabridge:main"
 
 [tool.hatch.version]
 path = "src/parabridge/__about__.py"
