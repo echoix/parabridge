@@ -1,0 +1,3 @@
+[submodule "src/pyparadoxdb"]
+	path = src/pyparadoxdb
+	url = https://github.com/echoix/pyparadoxdb.git
