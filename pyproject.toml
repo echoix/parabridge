@@ -29,7 +29,11 @@ classifiers = [
   "Natural Language :: English",
   "Topic :: Database",
 ]
-dependencies = ["click"]
+dependencies = [
+  "click",
+  # "pyparadoxdb@git+https://github.com/echoix/pyparadoxdb.git@dev-hatch",
+  "pyparadoxdb@{root:uri}/src/pyparadoxdb",
+]
 
 [project.urls]
 Documentation = "https://github.com/grigoryvp/parabridge"
@@ -41,6 +45,9 @@ parabridge = "parabridge.cli:parabridge"
 
 [tool.hatch.version]
 path = "src/parabridge/__about__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.hatch.envs.default]
 dependencies = ["coverage[toml]>=6.5", "pytest"]

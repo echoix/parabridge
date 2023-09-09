@@ -15,7 +15,7 @@ import sqlite3
 import datetime
 from xmlrpc.server import SimpleXMLRPCServer
 
-import pyparadox
+import pyparadoxdb
 
 from parabridge import settings
 
@@ -95,10 +95,10 @@ class Worker( threading.Thread ):
       mArgs = { 'shutdown': self._shutdown_o }
       ##  First time parse of this file?
       if nIndexLast is None:
-        oDb = pyparadox.open( s_src, ** mArgs )
+        oDb = pyparadoxdb.open( s_src, ** mArgs )
       else:
         mArgs[ 'start' ] = nIndexLast + 1
-        oDb = pyparadox.open( s_src, ** mArgs )
+        oDb = pyparadoxdb.open( s_src, ** mArgs )
       ##  We can handle only tables that has autoincrement field (if
       ##  such field exists, it will be first for Paradox database. We
       ##  need it to detect updates).
@@ -114,7 +114,7 @@ class Worker( threading.Thread ):
         nIndexLast = nIndex
         self.processParadoxRecord( oDb, oRecord, o_conn, sFile )
       settings.instance.indexLastSet( s_guid, sFile, nIndexLast )
-    except pyparadox.Shutdown:
+    except pyparadoxdb.Shutdown:
       return False
     return True
 
@@ -140,7 +140,7 @@ class Worker( threading.Thread ):
       ##! Paradox autoincrement field starts from 1, while for SQLite it
       ##  starts from 0 and adding first item with 1 will raise an error.
       ##  As workaround, use non-autoincrement field for SQLite.
-      if pyparadox.CField.AUTOINCREMENT == oField.type:
+      if pyparadoxdb.CField.AUTOINCREMENT == oField.type:
         sSignature = "{0} INTEGER".format( sName )
       else:
         sSignature = "{0} {1}".format( sName, oField.toSqliteType() )
@@ -227,17 +227,19 @@ class Server( SimpleXMLRPCServer, object ):
     return True
 
 
-settings.instance.init()
-oParser = argparse.ArgumentParser( description = "Parabridge daemon" )
-oParser.add_argument( 'port', type = int, help = "Port to listen on" )
-oArgs = oParser.parse_args()
 
-Worker.instance().start()
-try:
-  Server( oArgs.port ).serve_forever()
-except socket.error:
-  ##  Unable to bind to port if already started.
-  pass
-finally:
-  Worker.instance().shutdown()
+if __name__ == "__main__":
+  settings.instance.init()
+  oParser = argparse.ArgumentParser( description = "Parabridge daemon" )
+  oParser.add_argument( 'port', type = int, help = "Port to listen on" )
+  oArgs = oParser.parse_args()
 
+  Worker.instance().start()
+  try:
+    Server( oArgs.port ).serve_forever()
+  except socket.error:
+    ##  Unable to bind to port if already started.
+    pass
+  finally:
+    Worker.instance().shutdown()
+# end main
