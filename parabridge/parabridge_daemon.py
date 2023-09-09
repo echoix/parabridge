@@ -17,7 +17,7 @@ from SimpleXMLRPCServer import SimpleXMLRPCServer
 
 import pyparadox
 
-import settings
+from . import settings
 
 
 class Worker( threading.Thread ):

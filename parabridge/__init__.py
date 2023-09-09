@@ -8,12 +8,12 @@
 import os
 import argparse
 import subprocess
-import xmlrpclib
+import xmlrpc.client
 import socket
 import logging
 
-import settings
-import info
+from . import settings
+from . import info
 
 
 HELP_APP = """Paradox to SQLite bridge. This tool monitors specified
@@ -39,7 +39,7 @@ def start( _ ):
 
 def stop( _ ):
   try:
-    oSrv = xmlrpclib.ServerProxy( info.COMM_ADDR )
+    oSrv = xmlrpc.client.ServerProxy( info.COMM_ADDR )
     oSrv.stop()
   except socket.error:
     pass
@@ -47,7 +47,7 @@ def stop( _ ):
 
 def status( _ ):
   try:
-    oSrv = xmlrpclib.ServerProxy( info.COMM_ADDR )
+    oSrv = xmlrpc.client.ServerProxy( info.COMM_ADDR )
     print( oSrv.status() )
   except socket.error:
     print( "Daemon is not running." )

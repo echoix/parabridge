@@ -5,12 +5,12 @@
 # Copyright 2013 Grigory Petrov
 # See LICENSE for details.
 
-import xmlrpclib
+import xmlrpc.client
 import socket
 import sqlite3
 import uuid
 
-import info
+from . import info
 
 SQL_CREATE = """
   CREATE TABLE IF NOT EXISTS task (
@@ -57,7 +57,7 @@ class Settings( object ):
     if not self._notify_f:
       return
     try:
-      xmlrpclib.ServerProxy( info.COMM_ADDR ).cfg_changed()
+      xmlrpc.client.ServerProxy( info.COMM_ADDR ).cfg_changed()
     except socket.error:
       pass
 
