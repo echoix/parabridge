@@ -10,7 +10,7 @@ import socket
 import sqlite3
 import uuid
 
-import info
+from parabridge import info
 
 SQL_CREATE = """
   CREATE TABLE IF NOT EXISTS task (

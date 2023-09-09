@@ -1,0 +1,3 @@
+[submodule "src/pyparadox"]
+	path = src/pyparadox
+	url = https://github.com/grigoryvp/pyparadox

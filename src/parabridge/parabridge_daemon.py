@@ -13,11 +13,11 @@ import os
 import re
 import sqlite3
 import datetime
-from SimpleXMLRPCServer import SimpleXMLRPCServer
+from xmlrpc.server import SimpleXMLRPCServer
 
 import pyparadox
 
-from . import settings
+from parabridge import settings
 
 
 class Worker( threading.Thread ):
