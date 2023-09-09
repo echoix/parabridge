@@ -36,21 +36,22 @@ HELP_TASK_ADD = """Adds task with specified name (name can be used later
 HELP_TASK_DEL = """Deletes task with specified name."""
 HELP_TASK_LIST = """Displays list of added tasks."""
 
+click.echo(__version__)
+click.echo(__name__)
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]}, invoke_without_command=False, help=HELP_APP)
 @click.version_option(version=__version__, prog_name="parabridge")
-def parabridge():
-    # click.echo("Hello world!")
+def parabridgecli():
     pass
 
 
-@parabridge.command(help=HELP_START)
+@click.command(help=HELP_START)
 def start():
     sFile = os.path.join(os.path.dirname(__file__), "../parabridge_daemon.py")
     subprocess.Popen(['python', sFile, str(info.COMM_PORT)])
 
 
-@parabridge.command(help=HELP_STOP)
+@click.command(help=HELP_STOP)
 def stop():
     try:
         oSrv = xmlrpc.client.ServerProxy(info.COMM_ADDR)
@@ -59,7 +60,7 @@ def stop():
         pass
 
 
-@parabridge.command(help=HELP_STATUS)
+@click.command(help=HELP_STATUS)
 def status():
     try:
         oSrv = xmlrpc.client.ServerProxy(info.COMM_ADDR)
@@ -68,7 +69,7 @@ def status():
         click.echo("Daemon is not running.")
 
 
-@parabridge.command("task_add", help=HELP_TASK_ADD)
+@click.command("task_add", help=HELP_TASK_ADD)
 @click.argument('task_name')
 @click.argument('task_src')
 @click.argument('task_dst')
@@ -80,13 +81,13 @@ def task_add(m_args):
         logging.warning("Already has '{0}' task".format(sName))
 
 
-@parabridge.command("task_del", help=HELP_TASK_DEL)
+@click.command("task_del", help=HELP_TASK_DEL)
 def task_del(m_args):
     if not settings.instance.taskDelByName(m_args['task_name']):
         logging.warning("No task named '{0}'".format(m_args['task_name']))
 
 
-@parabridge.command("task_list", help=HELP_TASK_LIST)
+@click.command("task_list", help=HELP_TASK_LIST)
 def task_list():
     lTasks = settings.instance.taskList()
     if 0 == len(lTasks):
@@ -94,3 +95,11 @@ def task_list():
         return
     for mTask in lTasks:
         click.echo("{0}\n  Source: {1}\n  Destination: {2}".format(mTask['name'], mTask['src'], mTask['dst']))
+
+
+parabridgecli.add_command(start)
+parabridgecli.add_command(stop)
+parabridgecli.add_command(status)
+parabridgecli.add_command(task_add)
+parabridgecli.add_command(task_del)
+parabridgecli.add_command(task_list)
