@@ -102,7 +102,7 @@ class Worker( threading.Thread ):
       ##  We can handle only tables that has autoincrement field (if
       ##  such field exists, it will be first for Paradox database. We
       ##  need it to detect updates).
-      if len( oDb.fields ) < 1 or not oDb.fields[ 0 ].IsAutoincrement():
+      if len( oDb.fields ) < 1 or not oDb.fields[ 0 ].isAutoincrement():
         return False
       ##  Table empty or not updated since saved last index.
       if 0 == len( oDb.records ):
