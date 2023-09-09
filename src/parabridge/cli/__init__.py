@@ -36,12 +36,10 @@ HELP_TASK_ADD = """Adds task with specified name (name can be used later
 HELP_TASK_DEL = """Deletes task with specified name."""
 HELP_TASK_LIST = """Displays list of added tasks."""
 
-click.echo(__version__)
-click.echo(__name__)
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]}, invoke_without_command=False, help=HELP_APP)
 @click.version_option(version=__version__, prog_name="parabridge")
-def parabridgecli():
+def parabridge():
     pass
 
 
@@ -97,9 +95,9 @@ def task_list():
         click.echo("{0}\n  Source: {1}\n  Destination: {2}".format(mTask['name'], mTask['src'], mTask['dst']))
 
 
-parabridgecli.add_command(start)
-parabridgecli.add_command(stop)
-parabridgecli.add_command(status)
-parabridgecli.add_command(task_add)
-parabridgecli.add_command(task_del)
-parabridgecli.add_command(task_list)
+parabridge.add_command(start)
+parabridge.add_command(stop)
+parabridge.add_command(status)
+parabridge.add_command(task_add)
+parabridge.add_command(task_del)
+parabridge.add_command(task_list)
