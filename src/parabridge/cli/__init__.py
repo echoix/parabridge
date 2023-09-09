@@ -64,19 +64,20 @@ def status():
 @click.argument('task_name')
 @click.argument('task_src')
 @click.argument('task_dst')
-def task_add(m_args):
-    sName = m_args['task_name']
-    sSrc = m_args['task_src']
-    sDst = m_args['task_dst']
+def task_add(task_name, task_src, task_dst):
+    sName = task_name
+    sSrc = task_src
+    sDst = task_dst
     if not settings.instance.taskAdd(sName, sSrc, sDst):
         logging.warning("Already has '{0}' task".format(sName))
 
 
 @click.command("task_del", help=HELP_TASK_DEL)
-def task_del(m_args):
-    if not settings.instance.taskDelByName(m_args['task_name']):
-        logging.warning("No task named '{0}'".format(m_args['task_name']))
-
+@click.argument("task_name",)
+def task_del(task_name):
+    if not settings.instance.taskDelByName(task_name):
+        logging.warning("No task named '{0}'".format(task_name))
+        
 
 @click.command("task_list", help=HELP_TASK_LIST)
 def task_list():
