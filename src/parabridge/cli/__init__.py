@@ -21,20 +21,13 @@ import logging
 from parabridge import info
 from parabridge import settings
 
-HELP_APP = """Paradox to SQLite bridge. This tool monitors specified
-  Paradox database and reflects all changes to specified SQLite database
-  that can be used by any application that has problems with Paradox."""
-HELP_START = """Starts background process that will monitor Paradox
-  databse."""
-HELP_STOP = """Stops background process that was previously started with
-  'start'."""
-HELP_STATUS = """Shows current background process status."""
-HELP_TASK_ADD = """Adds task with specified name (name can be used later
-  to manage tasks), path to source Paradox database directory ('~' will
-  be expanded) and path to destination SQLite database file ('~' will
-  be expanded)."""
-HELP_TASK_DEL = """Deletes task with specified name."""
-HELP_TASK_LIST = """Displays list of added tasks."""
+HELP_APP = f"parabridge, version {__version__}\n\nParadox to SQLite bridge. This tool monitors specified Paradox database and reflects all changes to specified SQLite database that can be used by any application that has problems with Paradox."
+HELP_START = "Starts background process that will monitor Paradox database."
+HELP_STOP = "Stops background process that was previously started with 'start'."
+HELP_STATUS = "Shows current background process status."
+HELP_TASK_ADD = "Adds task with specified name (name can be used later to manage tasks), path to source Paradox database directory ('~' will be expanded) and path to destination SQLite database file ('~' will be expanded)."
+HELP_TASK_DEL = "Deletes task with specified name."
+HELP_TASK_LIST = "Displays list of added tasks."
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]}, invoke_without_command=False, help=HELP_APP)
