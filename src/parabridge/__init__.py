@@ -7,5 +7,6 @@ def main():
     import parabridge.cli
     sys.exit(parabridge.cli.parabridgecli())
 
+__all__ =["info","parabridge_daemon", "settings", "cli"]
 if __name__ == "__main__":
     main()

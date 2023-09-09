@@ -21,6 +21,9 @@ import logging
 from parabridge import info
 from parabridge import settings
 
+print(__package__)
+print(__version__)
+
 HELP_APP = """Paradox to SQLite bridge. This tool monitors specified
   Paradox database and reflects all changes to specified SQLite database
   that can be used by any application that has problems with Paradox."""
