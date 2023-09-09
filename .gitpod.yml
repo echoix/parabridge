@@ -1,0 +1,9 @@
+# List the start up tasks. Learn more: https://www.gitpod.io/docs/configure/workspaces/tasks
+# Commands that will run on workspace start
+tasks:
+    - name: Setup, Install & Build
+      before: python3 -m pip install --user pipx && python3 -m pipx ensurepath && python -m pipx install hatch
+      command: hatch build
+
+
+# Learn more from ready-to-use templates: https://www.gitpod.io/docs/introduction/getting-started/quickstart
