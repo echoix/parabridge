@@ -10,7 +10,7 @@ import pkg_resources
 
 NAME_SHORT = "parabridge"
 VER_MAJOR = 0
-VER_MINOR = 1
+VER_MINOR = 2
 try:
   VER_TXT = pkg_resources.require( NAME_SHORT )[ 0 ].version
 ##  Installing via 'setup.py develop'?
