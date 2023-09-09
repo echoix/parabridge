@@ -12,8 +12,8 @@ import xmlrpc.client
 import socket
 import logging
 
-from . import settings
-from . import info
+import settings
+import info
 
 
 HELP_APP = """Paradox to SQLite bridge. This tool monitors specified
