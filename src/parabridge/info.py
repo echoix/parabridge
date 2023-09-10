@@ -20,13 +20,18 @@ except pkg_resources.DistributionNotFound:
 DIR_THIS = os.path.dirname(os.path.abspath(__file__))
 DIR_HOME = os.path.expanduser("~")
 NAME_FULL = "Paradox to SQLite bridge."
-DESCR = """
+DESCR = (
+    """
 {s_name_short} v. {s_ver_txt}\\n\\n
 A simple python daemon that can dynamically sync paradox database with
 SQLite database.
-""".replace("\n", "").replace("\\n", "\n").strip().format(
-    s_name_short=NAME_SHORT,
-    s_ver_txt=VER_TXT)
+""".replace(
+        "\n", ""
+    )
+    .replace("\\n", "\n")
+    .strip()
+    .format(s_name_short=NAME_SHORT, s_ver_txt=VER_TXT)
+)
 
 COMM_PORT = 17963
 COMM_ADDR = f"http://localhost:{COMM_PORT}/"

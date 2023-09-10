@@ -45,7 +45,6 @@ class Worker(threading.Thread):
             time.sleep(1)
 
     def processTask(self, s_guid, s_name, s_src, s_dst):
-
         def setRes(i_sTxt):
             self._results_m[s_name] = i_sTxt
             return False
@@ -127,7 +126,7 @@ class Worker(threading.Thread):
         mArgs = {
             "name": re.sub(r"(?i)\.db$", "", s_file).lower(),
             "fields": ", ".join([FieldName(o.name) for o in o_db.fields]),
-            "values": ", ".join([FieldKey(o.name) for o in o_db.fields])
+            "values": ", ".join([FieldKey(o.name) for o in o_db.fields]),
         }
         lSignatures = []
         for i, oField in enumerate(o_db.fields):
@@ -180,7 +179,6 @@ class Worker(threading.Thread):
 
 
 class Server(SimpleXMLRPCServer):
-
     def __init__(self, n_port):
         gAddr = ("localhost", n_port)
         SimpleXMLRPCServer.__init__(self, gAddr, logRequests=False)
@@ -201,7 +199,8 @@ class Server(SimpleXMLRPCServer):
         oTimeReloadLast = Worker.instance().timeReloadLast()
         sMsg = """Daemon is running.
       \tConfiguration reloaded: {}""".format(
-            time.strftime("%Y.%m.%d %H:%M:%S", oTimeReloadLast))
+            time.strftime("%Y.%m.%d %H:%M:%S", oTimeReloadLast)
+        )
         mResults = Worker.instance().results()
         for sKey in sorted(mResults.keys()):
             sMsg += f"\n{sKey}:\n\t {mResults[sKey]}"

@@ -37,7 +37,6 @@ SQL_INDEX_LAST_GET = """SELECT index_last FROM index_last WHERE
 
 
 class Settings:
-
     def __init__(self):
         self._init_f = False
         self._notify_f = False
@@ -60,11 +59,7 @@ class Settings:
     def taskAdd(self, s_name, s_src, s_dst):
         with sqlite3.connect(info.FILE_CFG) as oConn:
             try:
-                mValues = {
-                    "guid": str(uuid.uuid4()),
-                    "name": s_name,
-                    "src": s_src,
-                    "dst": s_dst}
+                mValues = {"guid": str(uuid.uuid4()), "name": s_name, "src": s_src, "dst": s_dst}
                 oConn.execute(SQL_TASK_ADD, mValues)
             except sqlite3.IntegrityError:
                 ##  Name not unique.
@@ -76,10 +71,7 @@ class Settings:
 
     def indexLastSet(self, s_guid, s_file, n_index):
         with sqlite3.connect(info.FILE_CFG) as oConn:
-            mArgs = {
-                "guid": s_guid,
-                "file": s_file,
-                "index_last": n_index}
+            mArgs = {"guid": s_guid, "file": s_file, "index_last": n_index}
             oRet = oConn.execute(SQL_INDEX_LAST_UPDATE, mArgs)
             if oRet.rowcount > 0:
                 return

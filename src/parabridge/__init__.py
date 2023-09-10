@@ -6,6 +6,7 @@ import sys
 
 def main():
     import parabridge.cli
+
     sys.exit(parabridge.cli.parabridge())
 
 
