@@ -81,110 +81,102 @@ class Worker(threading.Thread):
 
     ##x Process individual Paradox |.db| file and synchronize specified
     ##  SQLite database file with it.
-
-
-def processParadoxFile(self, s_guid, s_src, o_conn):
-    try:
-        sFile = os.path.basename(s_src)
-        nIndexLast = settings.instance.indexLastGet(s_guid, sFile)
-        mArgs = {"shutdown": self._shutdown_o}
-        ##  First time parse of this file?
-        if nIndexLast is None:
-            oDb = pyparadoxdb.open(s_src, **mArgs)
-        else:
-            mArgs["start"] = nIndexLast + 1
-            oDb = pyparadoxdb.open(s_src, **mArgs)
-        ##  We can handle only tables that has autoincrement field (if
-        ##  such field exists, it will be first for Paradox database. We
-        ##  need it to detect updates).
-        if len(oDb.fields) < 1 or not oDb.fields[0].isAutoincrement():
+    def processParadoxFile(self, s_guid, s_src, o_conn):
+        try:
+            sFile = os.path.basename(s_src)
+            nIndexLast = settings.instance.indexLastGet(s_guid, sFile)
+            mArgs = {"shutdown": self._shutdown_o}
+            ##  First time parse of this file?
+            if nIndexLast is None:
+                oDb = pyparadoxdb.open(s_src, **mArgs)
+            else:
+                mArgs["start"] = nIndexLast + 1
+                oDb = pyparadoxdb.open(s_src, **mArgs)
+            ##  We can handle only tables that has autoincrement field (if
+            ##  such field exists, it will be first for Paradox database. We
+            ##  need it to detect updates).
+            if len(oDb.fields) < 1 or not oDb.fields[0].isAutoincrement():
+                return False
+            ##  Table empty or not updated since saved last index.
+            if 0 == len(oDb.records):
+                return True
+            for oRecord in oDb.records:
+                nIndex = oRecord.fields[0]
+                if nIndexLast is not None and nIndexLast >= nIndex:
+                    msg = "Consistency error."
+                    raise Exception(msg)
+                nIndexLast = nIndex
+                self.processParadoxRecord(oDb, oRecord, o_conn, sFile)
+            settings.instance.indexLastSet(s_guid, sFile, nIndexLast)
+        except pyparadoxdb.Shutdown:
             return False
-        ##  Table empty or not updated since saved last index.
-        if 0 == len(oDb.records):
-            return True
-        for oRecord in oDb.records:
-            nIndex = oRecord.fields[0]
-            if nIndexLast is not None and nIndexLast >= nIndex:
-                msg = "Consistency error."
-                raise Exception(msg)
-            nIndexLast = nIndex
-            self.processParadoxRecord(oDb, oRecord, o_conn, sFile)
-        settings.instance.indexLastSet(s_guid, sFile, nIndexLast)
-    except pyparadoxdb.Shutdown:
-        return False
-    return True
+        return True
 
+    def processParadoxRecord(self, o_db, o_record, o_conn, s_file):
+        def FieldName(i_sParadoxName):
+            ##! Paradox fields may be named like 'index' that is not a valid
+            ##  name for SQLite.
+            return f"f_{i_sParadoxName.lower()}"
 
-def processParadoxRecord(self, o_db, o_record, o_conn, s_file):
-    def FieldName(i_sParadoxName):
-        ##! Paradox fields may be named like 'index' that is not a valid
-        ##  name for SQLite.
-        return f"f_{i_sParadoxName.lower()}"
+        def FieldKey(i_sParadoxName):
+            return f":{FieldName(i_sParadoxName)}"
 
-    def FieldKey(i_sParadoxName):
-        return f":{FieldName(i_sParadoxName)}"
+        ##! Table name as written in Paradox table file may not be unique among
+        ##  multiple files in single Paradox folder. Use file name as table name
+        ##  for SQLite.
+        mArgs = {
+            "name": re.sub(r"(?i)\.db$", "", s_file).lower(),
+            "fields": ", ".join([FieldName(o.name) for o in o_db.fields]),
+            "values": ", ".join([FieldKey(o.name) for o in o_db.fields])
+        }
+        lSignatures = []
+        for i, oField in enumerate(o_db.fields):
+            sName = FieldName(oField.name)
+            ##! Paradox autoincrement field starts from 1, while for SQLite it
+            ##  starts from 0 and adding first item with 1 will raise an error.
+            ##  As workaround, use non-autoincrement field for SQLite.
+            if pyparadoxdb.CField.AUTOINCREMENT == oField.type:
+                sSignature = f"{sName} INTEGER"
+            else:
+                sSignature = f"{sName} {oField.toSqliteType()}"
+            lSignatures.append(sSignature)
+        mArgs["signature"] = ", ".join(lSignatures)
+        sQuery = "CREATE TABLE IF NOT EXISTS {name} ({signature})"
+        sQuery = sQuery.format(**mArgs)
+        o_conn.execute(sQuery, mArgs)
+        sQuery = "INSERT INTO {name} ({fields}) VALUES ({values})"
+        sQuery = sQuery.format(**mArgs)
+        mArgs = {}
+        for i, oField in enumerate(o_db.fields):
+            uField = o_record.fields[i]
+            lUnsupported = [datetime.time, datetime.date, datetime.datetime]
+            if str == type(uField):
+                uField = uField.decode("cp1251")
+            if type(uField) in lUnsupported:
+                ##  SQLite don't have time types, use |ISO 8601| string.
+                uField = uField.isoformat()
+            mArgs[FieldName(oField.name)] = uField
+        o_conn.execute(sQuery, mArgs)
 
-    ##! Table name as written in Paradox table file may not be unique among
-    ##  multiple files in single Paradox folder. Use file name as table name
-    ##  for SQLite.
-    mArgs = {
-        "name": re.sub(r"(?i)\.db$", "", s_file).lower(),
-        "fields": ", ".join([FieldName(o.name) for o in o_db.fields]),
-        "values": ", ".join([FieldKey(o.name) for o in o_db.fields])
-    }
-    lSignatures = []
-    for i, oField in enumerate(o_db.fields):
-        sName = FieldName(oField.name)
-        ##! Paradox autoincrement field starts from 1, while for SQLite it
-        ##  starts from 0 and adding first item with 1 will raise an error.
-        ##  As workaround, use non-autoincrement field for SQLite.
-        if pyparadoxdb.CField.AUTOINCREMENT == oField.type:
-            sSignature = f"{sName} INTEGER"
-        else:
-            sSignature = f"{sName} {oField.toSqliteType()}"
-        lSignatures.append(sSignature)
-    mArgs["signature"] = ", ".join(lSignatures)
-    sQuery = "CREATE TABLE IF NOT EXISTS {name} ({signature})"
-    sQuery = sQuery.format(**mArgs)
-    o_conn.execute(sQuery, mArgs)
-    sQuery = "INSERT INTO {name} ({fields}) VALUES ({values})"
-    sQuery = sQuery.format(**mArgs)
-    mArgs = {}
-    for i, oField in enumerate(o_db.fields):
-        uField = o_record.fields[i]
-        lUnsupported = [datetime.time, datetime.date, datetime.datetime]
-        if str == type(uField):
-            uField = uField.decode("cp1251")
-        if type(uField) in lUnsupported:
-            ##  SQLite don't have time types, use |ISO 8601| string.
-            uField = uField.isoformat()
-        mArgs[FieldName(oField.name)] = uField
-    o_conn.execute(sQuery, mArgs)
+    def shutdown(self):
+        self._shutdown_f = True
+        ##! After |_shutdown_f| is set to prevent races.
+        self._shutdown_o.set()
 
+    @classmethod
+    def instance(cls):
+        if not cls._instance_o:
+            cls._instance_o = Worker()
+        return cls._instance_o
 
-def shutdown(self):
-    self._shutdown_f = True
-    ##! After |_shutdown_f| is set to prevent races.
-    self._shutdown_o.set()
+    def cfgChanged(self):
+        self._cfgCHanged_f = True
 
+    def results(self):
+        return self._results_m
 
-@classmethod
-def instance(cls):
-    if not cls._instance_o:
-        cls._instance_o = Worker()
-    return cls._instance_o
-
-
-def cfgChanged(self):
-    self._cfgCHanged_f = True
-
-
-def results(self):
-    return self._results_m
-
-
-def timeReloadLast(self):
-    return self._timeReloadLast_o
+    def timeReloadLast(self):
+        return self._timeReloadLast_o
 
 
 class Server(SimpleXMLRPCServer):
