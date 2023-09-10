@@ -3,10 +3,12 @@
 # SPDX-License-Identifier: GPL-3.0-only
 import sys
 
+
 def main():
     import parabridge.cli
     sys.exit(parabridge.cli.parabridge())
 
-__all__ =["info","parabridge_daemon", "settings", "cli"]
+
+__all__ = ["info", "parabridge_daemon", "settings", "cli"]
 if __name__ == "__main__":
     main()

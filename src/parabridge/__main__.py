@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-only
 
-from . import main
+from parabridge import main
 
 if __name__ == "__main__":
     main()

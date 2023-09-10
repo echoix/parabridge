@@ -7,25 +7,26 @@
 # Copyright 2013 Grigory Petrov
 # See LICENSE for details.
 
-import click
-
-from parabridge.__about__ import __version__
-
-import xmlrpc.client
-
-import subprocess
+import logging
 import os
 import socket
-import logging
+import subprocess
+import xmlrpc.client
 
-from parabridge import info
-from parabridge import settings
+import click
 
-HELP_APP = f"parabridge, version {__version__}\n\nParadox to SQLite bridge. This tool monitors specified Paradox database and reflects all changes to specified SQLite database that can be used by any application that has problems with Paradox."
+from parabridge import info, settings
+from parabridge.__about__ import __version__
+
+HELP_APP = (f"parabridge, version {__version__}\n\nParadox to SQLite bridge. This tool monitors specified Paradox "
+            "database and reflects all changes to specified SQLite database that can be used by any application that "
+            "has problems with Paradox.")
 HELP_START = "Starts background process that will monitor Paradox database."
 HELP_STOP = "Stops background process that was previously started with 'start'."
 HELP_STATUS = "Shows current background process status."
-HELP_TASK_ADD = "Adds task with specified name (name can be used later to manage tasks), path to source Paradox database directory ('~' will be expanded) and path to destination SQLite database file ('~' will be expanded)."
+HELP_TASK_ADD = ("Adds task with specified name (name can be used later to manage tasks), path to source Paradox "
+                 "database directory ('~' will be expanded) and path to destination SQLite database file ('~' will be"
+                 " expanded).")
 HELP_TASK_DEL = "Deletes task with specified name."
 HELP_TASK_LIST = "Displays list of added tasks."
 
@@ -39,7 +40,7 @@ def parabridge():
 @click.command(help=HELP_START)
 def start():
     sFile = os.path.join(os.path.dirname(__file__), "../parabridge_daemon.py")
-    subprocess.Popen(['python', sFile, str(info.COMM_PORT)])
+    subprocess.Popen(["python", sFile, str(info.COMM_PORT)])
 
 
 @click.command(help=HELP_STOP)
@@ -47,7 +48,7 @@ def stop():
     try:
         oSrv = xmlrpc.client.ServerProxy(info.COMM_ADDR)
         oSrv.stop()
-    except socket.error:
+    except OSError:
         pass
 
 
@@ -56,28 +57,28 @@ def status():
     try:
         oSrv = xmlrpc.client.ServerProxy(info.COMM_ADDR)
         click.echo(oSrv.status())
-    except socket.error:
+    except OSError:
         click.echo("Daemon is not running.")
 
 
 @click.command("task_add", help=HELP_TASK_ADD)
-@click.argument('task_name')
-@click.argument('task_src')
-@click.argument('task_dst')
+@click.argument("task_name")
+@click.argument("task_src")
+@click.argument("task_dst")
 def task_add(task_name, task_src, task_dst):
     sName = task_name
     sSrc = task_src
     sDst = task_dst
     if not settings.instance.taskAdd(sName, sSrc, sDst):
-        logging.warning("Already has '{0}' task".format(sName))
+        logging.warning(f"Already has '{sName}' task")
 
 
 @click.command("task_del", help=HELP_TASK_DEL)
-@click.argument("task_name",)
+@click.argument("task_name", )
 def task_del(task_name):
     if not settings.instance.taskDelByName(task_name):
-        logging.warning("No task named '{0}'".format(task_name))
-        
+        logging.warning(f"No task named '{task_name}'")
+
 
 @click.command("task_list", help=HELP_TASK_LIST)
 def task_list():
@@ -86,7 +87,7 @@ def task_list():
         click.echo("Tasks list is empty.")
         return
     for mTask in lTasks:
-        click.echo("{0}\n  Source: {1}\n  Destination: {2}".format(mTask['name'], mTask['src'], mTask['dst']))
+        click.echo("{}\n  Source: {}\n  Destination: {}".format(mTask["name"], mTask["src"], mTask["dst"]))
 
 
 parabridge.add_command(start)
