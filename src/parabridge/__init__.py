@@ -9,6 +9,5 @@ def main():
     sys.exit(parabridge.cli.parabridge())
 
 
-__all__ = ["info", "parabridge_daemon", "settings", "cli"]
 if __name__ == "__main__":
     main()
